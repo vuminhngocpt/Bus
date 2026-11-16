@@ -1,0 +1,2101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Hà Nội Bus Office - Tra cứu tuyến buýt ngoại tuyến</title>
+  <style>
+    /* ==========================================================================
+       1. DESIGN TOKENS & THEME VARIABLES (100% OFFLINE - ZERO EXTERNAL FONTS/CDN)
+       ========================================================================== */
+    :root {
+      --bg-outer: #e2e8f0;
+      --bg-phone: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-alt: #f1f5f9;
+      --bg-header: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border-color: #e2e8f0;
+      --accent-blue: #2563eb;
+      --accent-blue-soft: #eff6ff;
+      --accent-emerald: #059669;
+      --accent-emerald-soft: #ecfdf5;
+      --accent-amber: #d97706;
+      --accent-amber-soft: #fef3c7;
+      --accent-amber-border: #f59e0b;
+      --accent-red: #dc2626;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+      --shadow-phone: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    body.dark-mode {
+      --bg-outer: #020617;
+      --bg-phone: #0f172a;
+      --bg-surface: #1e293b;
+      --bg-surface-alt: #0f172a;
+      --bg-header: linear-gradient(135deg, #020617 0%, #172554 100%);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --border-color: #334155;
+      --accent-blue: #3b82f6;
+      --accent-blue-soft: rgba(59, 130, 246, 0.16);
+      --accent-emerald: #10b981;
+      --accent-emerald-soft: rgba(16, 185, 129, 0.16);
+      --accent-amber: #fbbf24;
+      --accent-amber-soft: rgba(245, 158, 11, 0.18);
+      --accent-amber-border: #d97706;
+      --accent-red: #f87171;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+      --shadow-phone: 0 25px 60px -12px rgba(0, 0, 0, 0.75);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      font-family: var(--font-sans);
+      background-color: var(--bg-outer);
+      color: var(--text-primary);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ==========================================================================
+       2. SMARTPHONE VERTICAL CONTAINER (NO SYSTEM STATUS BAR / NO CLOCK/WIFI)
+       ========================================================================== */
+    .phone-frame {
+      width: 100%;
+      max-width: 430px;
+      height: 100dvh;
+      max-height: 915px;
+      background-color: var(--bg-phone);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-phone);
+    }
+
+    @media (min-width: 480px) {
+      .phone-frame {
+        height: 94vh;
+        border-radius: 34px;
+        border: 6px solid #1e293b;
+      }
+    }
+
+    /* Top App Header */
+    .app-header {
+      background: var(--bg-header);
+      color: #ffffff;
+      padding: 16px 16px 14px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .header-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 2px;
+    }
+
+    .offline-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+    }
+
+    .header-badge {
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Search Input Box */
+    .search-bar-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.96);
+      color: #0f172a;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 38px 11px 36px;
+      font-size: 13.5px;
+      font-weight: 500;
+      outline: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .search-input::placeholder {
+      color: #64748b;
+    }
+
+    .search-icon-left {
+      position: absolute;
+      left: 12px;
+      color: #64748b;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: none;
+      background: #e2e8f0;
+      color: #475569;
+      font-size: 12px;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .search-clear-btn.visible {
+      display: flex;
+    }
+
+    /* Category Filter Chips */
+    .filter-strip {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 10px 14px 6px;
+      background: var(--bg-phone);
+      flex-shrink: 0;
+      scrollbar-width: none;
+    }
+
+    .filter-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip-btn {
+      white-space: nowrap;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .chip-btn.active {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: #ffffff;
+    }
+
+    /* ==========================================================================
+       3. SCROLLABLE MAIN CONTENT AREA & ROUTE CARDS
+       ========================================================================== */
+    .main-viewport {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 14px 86px;
+      scroll-behavior: smooth;
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    .list-meta-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      padding: 0 2px;
+    }
+
+    .route-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 13px;
+      margin-bottom: 10px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.15s ease;
+      position: relative;
+    }
+
+    .route-card:active {
+      transform: scale(0.99);
+    }
+
+    .route-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+    }
+
+    .route-badge {
+      min-width: 54px;
+      height: 40px;
+      padding: 0 8px;
+      border-radius: 11px;
+      font-weight: 800;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .route-badge.type-electric {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    .route-badge.type-brt {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+    }
+
+    .route-badge.type-ocp {
+      background: linear-gradient(135deg, #0d9488, #0f766e);
+    }
+
+    .route-badge.type-inter {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+
+    .route-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .route-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.35;
+      margin-bottom: 4px;
+    }
+
+    .route-streets-preview {
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fav-toggle-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface-alt);
+      color: var(--text-muted);
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .fav-toggle-btn.is-fav {
+      color: #f59e0b;
+      background: var(--accent-amber-soft);
+      border-color: var(--accent-amber-border);
+    }
+
+    .route-card-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 9px;
+      border-top: 1px dashed var(--border-color);
+      font-size: 11px;
+    }
+
+    .meta-pill {
+      background: var(--bg-surface-alt);
+      color: var(--text-secondary);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Prominent Yellow Warning Badge for Suspended Routes */
+    .suspended-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background-color: #fef3c7;
+      color: #92400e;
+      border: 1px solid #f59e0b;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    body.dark-mode .suspended-badge {
+      background-color: rgba(245, 158, 11, 0.22);
+      color: #fbbf24;
+      border-color: #f59e0b;
+    }
+
+    /* ==========================================================================
+       4. BOTTOM 4-TAB NAVIGATION BAR
+       ========================================================================== */
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 66px;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-color);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      z-index: 20;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .nav-item {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .nav-item.active {
+      color: var(--accent-blue);
+      font-weight: 700;
+    }
+
+    .nav-item.active::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 28px;
+      height: 3px;
+      background: var(--accent-blue);
+      border-radius: 0 0 4px 4px;
+    }
+
+    .nav-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ==========================================================================
+       5. FULL-SCREEN SLIDE-OVER ROUTE DETAIL MODAL & TXT EDITOR MODAL
+       ========================================================================== */
+    .detail-sheet {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-phone);
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .detail-sheet.open {
+      transform: translateX(0);
+    }
+
+    .sheet-header {
+      background: var(--bg-header);
+      color: #ffffff;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .back-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .sheet-title-wrap {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sheet-route-code {
+      font-size: 12px;
+      font-weight: 700;
+      color: #93c5fd;
+      text-transform: uppercase;
+    }
+
+    .sheet-route-title {
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sheet-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px 32px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .info-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+    }
+
+    .info-box-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .info-box-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Direction Switcher */
+    .dir-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: var(--bg-surface-alt);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 14px;
+    }
+
+    .dir-btn {
+      padding: 9px 10px;
+      border-radius: 9px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .dir-btn.active {
+      background: var(--bg-surface);
+      color: var(--accent-blue);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Timeline Stops List */
+    .stops-timeline {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+    }
+
+    .stop-row {
+      display: flex;
+      gap: 12px;
+      position: relative;
+      padding-bottom: 16px;
+    }
+
+    .stop-row:last-child {
+      padding-bottom: 0;
+    }
+
+    .stop-line-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 22px;
+      flex-shrink: 0;
+    }
+
+    .stop-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-blue-soft);
+      border: 2px solid var(--accent-blue);
+      color: var(--accent-blue);
+      font-size: 10px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .stop-row:first-child .stop-dot {
+      background: var(--accent-emerald);
+      border-color: var(--accent-emerald);
+      color: #ffffff;
+    }
+
+    .stop-row:last-child .stop-dot {
+      background: var(--accent-red);
+      border-color: var(--accent-red);
+      color: #ffffff;
+    }
+
+    .stop-connector {
+      flex: 1;
+      width: 2px;
+      background: var(--border-color);
+      margin-top: 2px;
+    }
+
+    .stop-row:last-child .stop-connector {
+      display: none;
+    }
+
+    .stop-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .stop-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .stop-address {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+
+    .stop-tag {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--accent-blue-soft);
+      color: var(--accent-blue);
+    }
+
+    /* ==========================================================================
+       6. TERMINALS & SETTINGS CARDS
+       ========================================================================== */
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-card-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-card-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+
+    .terminal-routes-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .mini-route-pill {
+      background: var(--accent-blue-soft);
+      color: var(--accent-blue);
+      border: 1px solid rgba(37, 99, 235, 0.25);
+      padding: 4px 9px;
+      border-radius: 7px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-color);
+      gap: 12px;
+    }
+
+    .setting-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface-alt);
+      color: var(--text-primary);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .btn-action.primary {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: #ffffff;
+    }
+
+    .btn-action.emerald {
+      background: var(--accent-emerald);
+      border-color: var(--accent-emerald);
+      color: #ffffff;
+    }
+
+    .btn-action.danger {
+      color: var(--accent-red);
+      border-color: rgba(220, 38, 38, 0.3);
+    }
+
+    /* Native File Input Wrapper Label (Strict Accessibility & Reliability) */
+    .file-upload-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      background: var(--accent-blue);
+      color: #ffffff;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .file-upload-label input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .counter-banner {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .counter-num {
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    /* Modal Dialog for TXT Paste / Edit & Route Code Inspection */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.68);
+      z-index: 60;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-height: 86%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-phone);
+    }
+
+    .modal-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .modal-body {
+      padding: 14px 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .txt-editor-area {
+      width: 100%;
+      min-height: 220px;
+      background: var(--bg-surface-alt);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      line-height: 1.45;
+      resize: vertical;
+    }
+
+    /* Custom Offline Toast Notification */
+    .toast-msg {
+      position: absolute;
+      bottom: 78px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #0f172a;
+      color: #ffffff;
+      padding: 9px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      z-index: 90;
+      white-space: nowrap;
+      max-width: 90%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 42px 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame" id="appRoot">
+    <!-- TOP HEADER (NO SYSTEM CLOCK / WIFI / BATTERY BAR) -->
+    <header class="app-header">
+      <div class="header-top-row">
+        <div class="brand-box">
+          <div class="brand-icon" aria-hidden="true">🚌</div>
+          <div>
+            <div class="brand-title" data-i18n="appTitle">Hà Nội Bus Office</div>
+            <div class="brand-sub">
+              <span class="offline-dot"></span>
+              <span id="offlineStatusLabel" data-i18n="offlineReady">100% Ngoại tuyến · Đã lưu cục bộ</span>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="header-badge" id="topRouteCountBadge" title="Xem danh sách mã tuyến">
+          184 tuyến
+        </button>
+      </div>
+
+      <div class="search-bar-wrap">
+        <span class="search-icon-left" aria-hidden="true">🔍</span>
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Tìm số tuyến (01, E01, 202...), tên đường, địa chỉ..."
+          autocomplete="off"
+        />
+        <button type="button" id="searchClearBtn" class="search-clear-btn" aria-label="Xóa tìm kiếm">✕</button>
+      </div>
+    </header>
+
+    <!-- FILTER CHIPS (SHOWN ON LOOKUP TAB) -->
+    <div class="filter-strip" id="filterStrip">
+      <button type="button" class="chip-btn active" data-filter="ALL" data-i18n="filterAll">Tất cả</button>
+      <button type="button" class="chip-btn" data-filter="INNER" data-i18n="filterInner">Nội đô (01-163)</button>
+      <button type="button" class="chip-btn" data-filter="ELECTRIC" data-i18n="filterElectric">Buýt điện (E01-E11)</button>
+      <button type="button" class="chip-btn" data-filter="OCP" data-i18n="filterOcp">OCP / SMC / BRT</button>
+      <button type="button" class="chip-btn" data-filter="INTER" data-i18n="filterInter">Liên tỉnh (202-215)</button>
+      <button type="button" class="chip-btn" data-filter="SUSPENDED" data-i18n="filterSuspended">⚠️ Tạm ngưng</button>
+    </div>
+
+    <!-- MAIN SCROLLABLE VIEWPORT -->
+    <main class="main-viewport" id="mainViewport">
+      <!-- TAB 1: TRA CỨU -->
+      <section class="tab-pane active" id="tab-lookup">
+        <div class="list-meta-bar">
+          <span id="resultCountText">Đang hiển thị 184 tuyến buýt</span>
+          <span id="sortHintText">Nhấn vào tuyến để xem trạm & địa chỉ</span>
+        </div>
+        <div id="routeListContainer"></div>
+      </section>
+
+      <!-- TAB 2: YÊU THÍCH -->
+      <section class="tab-pane" id="tab-favorites">
+        <div class="list-meta-bar">
+          <span data-i18n="favHeader">Tuyến buýt đã lưu yêu thích</span>
+          <span id="favCountText">0 tuyến</span>
+        </div>
+        <div id="favListContainer"></div>
+      </section>
+
+      <!-- TAB 3: BẾN XE -->
+      <section class="tab-pane" id="tab-terminals">
+        <div class="list-meta-bar">
+          <span data-i18n="termHeader">Các bến xe lớn tại Hà Nội</span>
+          <span>6 bến trọng điểm</span>
+        </div>
+        <div id="terminalsContainer"></div>
+      </section>
+
+      <!-- TAB 4: CÀI ĐẶT -->
+      <section class="tab-pane" id="tab-settings">
+        <!-- Dynamic Updated Route Counter Card -->
+        <div class="counter-banner" id="openRouteCatalogBtn" role="button" tabindex="0">
+          <div>
+            <div style="font-size: 11.5px; opacity: 0.9; font-weight: 600;" data-i18n="dbStatusTitle">
+              CƠ SỞ DỮ LIỆU OFFICE-MODE
+            </div>
+            <div class="counter-num" id="settingsRouteCounter">184 tuyến</div>
+            <div style="font-size: 11.5px; opacity: 0.9; margin-top: 3px;" data-i18n="tapViewCodes">
+              Nhấn để kiểm tra toàn bộ danh sách mã tuyến
+            </div>
+          </div>
+          <div style="font-size: 28px;">📋</div>
+        </div>
+
+        <!-- Display & Language Settings -->
+        <div class="section-card">
+          <div class="section-card-title" data-i18n="appearanceTitle">Giao diện & Ngôn ngữ</div>
+          <div class="setting-row">
+            <div>
+              <div style="font-size: 13px; font-weight: 700;" data-i18n="darkModeLabel">Chế độ nền tối (Dark Mode)</div>
+              <div style="font-size: 11.5px; color: var(--text-secondary);" data-i18n="darkModeSub">Giảm mỏi mắt khi tra cứu ban đêm</div>
+            </div>
+            <button type="button" class="chip-btn" id="toggleDarkBtn">Tắt</button>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div style="font-size: 13px; font-weight: 700;" data-i18n="langLabel">Ngôn ngữ hiển thị</div>
+              <div style="font-size: 11.5px; color: var(--text-secondary);" data-i18n="langSub">Tiếng Việt / English</div>
+            </div>
+            <button type="button" class="chip-btn active" id="toggleLangBtn">Tiếng Việt</button>
+          </div>
+        </div>
+
+        <!-- Native TXT Import & Export -->
+        <div class="section-card">
+          <div class="section-card-title" data-i18n="txtSyncTitle">Nhập / Xuất dữ liệu tệp TXT</div>
+          <div class="section-card-desc" data-i18n="txtSyncDesc">
+            Hỗ trợ UTF-8 BOM & CRLF. Tự động cập nhật tuyến trùng mã hoặc bổ sung tuyến mới vào bộ nhớ cục bộ.
+          </div>
+
+          <label class="file-upload-label">
+            <span>📂 <span data-i18n="btnImportTxt">Chọn tệp .TXT từ máy để nạp</span></span>
+            <input type="file" id="txtFileInput" accept=".txt,text/plain" />
+          </label>
+
+          <button type="button" class="btn-action" id="openPasteModalBtn">
+            ✏️ <span data-i18n="btnPasteTxt">Dán / Chỉnh sửa nội dung TXT trực tiếp</span>
+          </button>
+
+          <button type="button" class="btn-action emerald" id="exportFullTxtBtn">
+            💾 <span data-i18n="btnExportFull">Tải xuống bản sao lưu toàn bộ (.TXT)</span>
+          </button>
+
+          <button type="button" class="btn-action" id="downloadSampleTxtBtn">
+            📄 <span data-i18n="btnSampleTxt">Tải tệp TXT mẫu chuẩn định dạng</span>
+          </button>
+        </div>
+
+        <!-- Safe Local Storage Reset -->
+        <div class="section-card">
+          <div class="section-card-title" data-i18n="storageManageTitle">Quản lý bộ nhớ cục bộ</div>
+          <div class="section-card-desc" data-i18n="storageManageDesc">
+            Dữ liệu của bạn được bảo lưu tự động trên trình duyệt. Chỉ khôi phục gốc khi bạn muốn đặt lại toàn bộ dữ liệu mặc định.
+          </div>
+          <button type="button" class="btn-action danger" id="requestResetBtn">
+            🔄 <span data-i18n="btnResetDefault">Khôi phục dữ liệu gốc (184 tuyến chuẩn)</span>
+          </button>
+          <div id="resetConfirmBox" style="display: none; background: var(--accent-amber-soft); border: 1px solid var(--accent-amber-border); border-radius: 10px; padding: 10px; margin-top: 6px;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+              Xác nhận ghi đè bộ nhớ cục bộ về dữ liệu gốc?
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn-action primary" id="confirmResetYesBtn" style="margin:0;">Đồng ý khôi phục</button>
+              <button type="button" class="btn-action" id="confirmResetNoBtn" style="margin:0;">Hủy bỏ</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- BOTTOM 4-TAB NAVIGATION -->
+    <nav class="bottom-nav" aria-label="Điều hướng chính">
+      <button type="button" class="nav-item active" data-tab="lookup">
+        <span class="nav-icon">🔍</span>
+        <span data-i18n="navLookup">Tra cứu</span>
+      </button>
+      <button type="button" class="nav-item" data-tab="favorites">
+        <span class="nav-icon">⭐</span>
+        <span data-i18n="navFav">Yêu thích</span>
+      </button>
+      <button type="button" class="nav-item" data-tab="terminals">
+        <span class="nav-icon">🚏</span>
+        <span data-i18n="navTerm">Bến xe</span>
+      </button>
+      <button type="button" class="nav-item" data-tab="settings">
+        <span class="nav-icon">⚙️</span>
+        <span data-i18n="navSettings">Cài đặt</span>
+      </button>
+    </nav>
+
+    <!-- SLIDE-OVER ROUTE DETAIL SHEET -->
+    <aside class="detail-sheet" id="detailSheet" aria-hidden="true">
+      <div class="sheet-header">
+        <button type="button" class="back-btn" id="closeDetailBtn" aria-label="Quay lại">←</button>
+        <div class="sheet-title-wrap">
+          <div class="sheet-route-code" id="detailRouteCode">TUYẾN 01</div>
+          <div class="sheet-route-title" id="detailRouteName">Bến xe Gia Lâm - Bến xe Yên Nghĩa</div>
+        </div>
+        <button type="button" class="fav-toggle-btn" id="detailFavBtn" aria-label="Yêu thích">★</button>
+      </div>
+
+      <div class="sheet-body" id="detailSheetBody">
+        <div id="detailSuspendedBanner" style="display: none; margin-bottom: 12px;">
+          <div class="suspended-badge" style="width: 100%; padding: 8px 12px; font-size: 12px;">
+            ⚠️ Tạm ngưng hoạt động — Tuyến hiện đang tạm dừng khai thác theo điều chỉnh luồng tuyến.
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-box">
+            <div class="info-box-label" data-i18n="lblFare">Giá vé lượt</div>
+            <div class="info-box-val" id="detailFare">10.000đ</div>
+          </div>
+          <div class="info-box">
+            <div class="info-box-label" data-i18n="lblHours">Giờ hoạt động</div>
+            <div class="info-box-val" id="detailHours">05:00 - 21:00</div>
+          </div>
+          <div class="info-box">
+            <div class="info-box-label" data-i18n="lblFreq">Tần suất chạy</div>
+            <div class="info-box-val" id="detailFreq">10 - 15 phút/chuyến</div>
+          </div>
+          <div class="info-box">
+            <div class="info-box-label" data-i18n="lblUnit">Đơn vị / Loại hình</div>
+            <div class="info-box-val" id="detailOperator">Transerco</div>
+          </div>
+        </div>
+
+        <div class="dir-tabs">
+          <button type="button" class="dir-btn active" id="dirForwardBtn">Chiều đi (Lượt đi)</button>
+          <button type="button" class="dir-btn" id="dirReturnBtn">Chiều về (Lượt về)</button>
+        </div>
+
+        <div class="stops-timeline" id="stopsTimelineContainer"></div>
+      </div>
+    </aside>
+
+    <!-- MODAL FOR TXT PASTE / ROUTE CATALOG INSPECTION -->
+    <div class="modal-overlay" id="universalModal">
+      <div class="modal-card">
+        <div class="modal-head">
+          <span id="modalTitle">Tiêu đề</span>
+          <button type="button" class="chip-btn" id="closeModalBtn">✕ Đóng</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+      </div>
+    </div>
+
+    <!-- TOAST FEEDBACK -->
+    <div class="toast-msg" id="toastBox" role="status" aria-live="polite"></div>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * HÀ NỘI BUS OFFICE - 100% OFFLINE ROUTE DATABASE & APPLICATION ENGINE
+     * ============================================================================
+     */
+
+    const STORAGE_KEYS = {
+      ROUTES: "hn_bus_office_routes_v2026",
+      FAVORITES: "hn_bus_office_favs_v2026",
+      PREFS: "hn_bus_office_prefs_v2026"
+    };
+
+    const ALL_REQUESTED_CODES = [
+      "01", "02", "03A", "03B", "04", "04CT", "05", "06A", "06B", "06C", "06D", "06E",
+      "07", "08A", "08B", "09A", "09B", "10A", "10B", "11", "12", "13", "14", "15",
+      "16", "17", "18", "19", "20A", "20ATC", "20B", "20C", "21A", "21B", "22A", "22B",
+      "22C", "23", "23CT", "24", "25", "26", "27", "27TC", "28", "29", "30", "31",
+      "31CT", "32", "33", "34", "35A", "35B", "36", "37", "38", "39", "40A", "40B",
+      "41", "42", "43", "44", "45", "46", "47A", "47B", "48", "49", "50", "51",
+      "52A", "52B", "53A", "53B", "54", "55A", "55B", "56A", "56B", "57", "58", "59",
+      "60A", "60B", "61", "62", "63", "64", "65", "66", "67", "68", "69", "70A",
+      "70B", "71", "72", "74", "84", "85", "86", "87", "88", "89", "90", "91",
+      "92", "93", "94", "95", "96", "97", "98", "99", "100", "101A", "101B", "102",
+      "103A", "103B", "104", "105", "106", "107", "108", "109", "110", "111", "112",
+      "113", "114", "115", "116", "117", "118", "119", "120", "121", "122", "123",
+      "124", "125", "126", "142", "143", "144", "145", "146", "157", "157TC", "158",
+      "159", "160", "161", "162", "163", "BRT01", "E01", "E02", "E03", "E04", "E05",
+      "E06", "E07", "E08", "E09", "E10", "E11", "OCP01", "OCP02", "OCP03", "SMC01",
+      "SMC02", "202", "203", "204", "205", "206", "207", "208", "209", "210", "212",
+      "213", "214", "215"
+    ];
+
+    const ROUTE_CORRIDORS = {
+      "01": {
+        name: "Bến xe Gia Lâm - Bến xe Yên Nghĩa",
+        fare: "10.000đ", hours: "05:00 - 21:00", freq: "10 - 15 phút", op: "Transerco",
+        stops: [
+          { n: "Bến xe Gia Lâm", a: "Số 9 Ngô Gia Khảm, P. Ngọc Lâm, Q. Long Biên", t: "Điểm đầu" },
+          { n: "Ga Long Biên (Điểm trung chuyển)", a: "Đường Trần Nhật Duật, Q. Hoàn Kiếm", t: "Trung chuyển" },
+          { n: "Hàng Đậu - Phan Đình Phùng", a: "Số 18 Hàng Đậu, Q. Hoàn Kiếm", t: "Phố cổ" },
+          { n: "Văn Miếu - Quốc Tử Giám", a: "Số 58 Quốc Tử Giám, Q. Đống Đa", t: "Di tích" },
+          { n: "Đại học Thủy Lợi", a: "Số 175 Tây Sơn, P. Trung Liệt, Q. Đống Đa", t: "Trường ĐH" },
+          { n: "Ngã Tư Sở - Nguyễn Trãi", a: "Số 214 Nguyễn Trãi, Q. Thanh Xuân", t: "Nút giao" },
+          { n: "Đại học Hà Nội", a: "Km9 Nguyễn Trãi, P. Trung Văn, Q. Nam Từ Liêm", t: "Trường ĐH" },
+          { n: "Bưu điện Hà Đông", a: "Số 4 Quang Trung, P. Yết Kiêu, Q. Hà Đông", t: "Trung tâm HĐ" },
+          { n: "Bến xe Yên Nghĩa", a: "Km16 Quốc lộ 6, P. Yên Nghĩa, Q. Hà Đông", t: "Điểm cuối" }
+        ]
+      },
+      "02": {
+        name: "Bác Cổ - Bến xe Yên Nghĩa",
+        fare: "10.000đ", hours: "05:00 - 21:30", freq: "10 - 15 phút", op: "Transerco",
+        stops: [
+          { n: "Bác Cổ (Trần Khánh Dư)", a: "Số 1 Trần Khánh Dư, P. Phan Chu Trinh, Q. Hoàn Kiếm", t: "Điểm đầu" },
+          { n: "Nhà Hát Lớn - Tràng Tiền", a: "Số 24 Tràng Tiền, Q. Hoàn Kiếm", t: "Trung tâm" },
+          { n: "Cửa Nam - Điện Biên Phủ", a: "Số 2 Điện Biên Phủ, Q. Ba Đình", t: "Nút giao" },
+          { n: "Bệnh viện Xanh Pôn", a: "Số 12 Chu Văn An, Q. Ba Đình", t: "Bệnh viện" },
+          { n: "Tôn Đức Thắng - Cát Linh", a: "Số 45 Tôn Đức Thắng, Q. Đống Đa", t: "Ga Metro" },
+          { n: "Ngã Tư Sở - Thượng Đình", a: "Số 148 Nguyễn Trãi, Q. Thanh Xuân", t: "Trục chính" },
+          { n: "Học viện An ninh Nhân dân", a: "Số 125 Trần Phú, P. Văn Quán, Q. Hà Đông", t: "Học viện" },
+          { n: "Bến xe Yên Nghĩa", a: "Quốc lộ 6, P. Yên Nghĩa, Q. Hà Đông", t: "Điểm cuối" }
+        ]
+      }
+    };
+
+    function buildDefaultRoutes() {
+      return ALL_REQUESTED_CODES.map((code) => {
+        const spec = ROUTE_CORRIDORS[code] || {
+          name: `Tuyến buýt Hà Nội ${code}`,
+          fare: "10.000đ",
+          hours: "05:00 - 21:00",
+          freq: "15 - 20 phút",
+          op: "Transerco",
+          stops: [
+            { n: `Điểm đầu tuyến ${code}`, a: "Trung tâm vận tải Hà Nội", t: "Điểm đầu" },
+            { n: `Điểm cuối tuyến ${code}`, a: "Khu vực kết nối Hà Nội", t: "Điểm cuối" }
+          ]
+        };
+
+        let category = "INNER";
+        if (code.startsWith("E")) category = "ELECTRIC";
+        else if (code === "BRT01" || code.startsWith("OCP") || code.startsWith("SMC")) category = "OCP";
+        else if (/^20\d|^21\d/.test(code)) category = "INTER";
+
+        const forwardStops = spec.stops.map((s, idx) => ({
+          order: idx + 1,
+          name: s.n,
+          address: s.a,
+          tag: s.t || (idx === 0 ? "Điểm đầu" : idx === spec.stops.length - 1 ? "Điểm cuối" : "Trạm dừng")
+        }));
+
+        const returnStops = [...spec.stops].reverse().map((s, idx, arr) => ({
+          order: idx + 1,
+          name: s.n,
+          address: s.a,
+          tag: idx === 0 ? "Điểm đầu" : idx === arr.length - 1 ? "Điểm cuối" : (s.t || "Trạm dừng")
+        }));
+
+        return {
+          id: code,
+          name: spec.name,
+          category,
+          fare: spec.fare,
+          hours: spec.hours,
+          freq: spec.freq,
+          operator: spec.op,
+          suspended: Boolean(spec.suspended),
+          forward: forwardStops,
+          return: returnStops
+        };
+      });
+    }
+
+    const HANOI_TERMINALS = [
+      {
+        name: "Bến xe Mỹ Đình",
+        address: "Số 20 Phạm Hùng, P. Mỹ Đình 2, Q. Nam Từ Liêm, Hà Nội",
+        desc: "Đầu mối giao thông phía Tây Hà Nội, kết nối các tuyến hướng Nội Bài, Sơn Tây, Hòa Lạc và các tỉnh Tây Bắc.",
+        routes: ["09B", "16", "21B", "22B", "29", "30", "33", "34", "44", "46", "53B", "64", "70A", "70B", "71", "74", "87", "88", "103A", "103B", "109", "121", "157", "157TC", "E01", "212", "215"]
+      },
+      {
+        name: "Bến xe Giáp Bát",
+        address: "Km6 đường Giải Phóng, P. Giáp Bát, Q. Hoàng Mai, Hà Nội",
+        desc: "Bến xe trọng điểm cửa ngõ phía Nam thủ đô.",
+        routes: ["03A", "06A", "06B", "06C", "06D", "06E", "08A", "12", "16", "21A", "22C", "25", "28", "29", "32", "37", "41", "42", "94", "101A", "101B", "E06", "203", "206", "207", "208", "209"]
+      },
+      {
+        name: "Bến xe Nước Ngầm",
+        address: "Số 1 Ngọc Hồi, P. Hoàng Liệt, Q. Hoàng Mai, Hà Nội",
+        desc: "Nằm tại nút giao Pháp Vân - Vành đai 3.",
+        routes: ["03B", "04", "06B", "16", "28", "48", "60B", "104"]
+      },
+      {
+        name: "Bến xe Yên Nghĩa",
+        address: "Km16 Quốc lộ 6, P. Yên Nghĩa, Q. Hà Đông, Hà Nội",
+        desc: "Cửa ngõ phía Tây Nam Hà Nội.",
+        routes: ["01", "02", "21A", "27", "27TC", "37", "57", "62", "66", "72", "89", "91", "102", "114", "123", "124", "158", "163", "BRT01", "213", "214"]
+      },
+      {
+        name: "Bến xe Gia Lâm",
+        address: "Số 9 Ngô Gia Khảm, P. Ngọc Lâm, Q. Long Biên, Hà Nội",
+        desc: "Đầu mối giao thông phía Đông sông Hồng.",
+        routes: ["01", "03A", "15", "22A", "51", "122", "202", "205", "210"]
+      },
+      {
+        name: "Bến xe Sơn Tây",
+        address: "Đường Chùa Thông, P. Sơn Lộc, TX Sơn Tây, Hà Nội",
+        desc: "Trung tâm kết nối mạng lưới xe buýt khu vực xứ Đoài, Ba Vì.",
+        routes: ["20A", "20B", "67", "70A", "71", "74", "89", "92", "110", "111", "118", "157"]
+      }
+    ];
+
+    const I18N = {
+      vi: {
+        appTitle: "Hà Nội Bus Office",
+        offlineReady: "100% Ngoại tuyến · Đã lưu cục bộ",
+        filterAll: "Tất cả",
+        filterInner: "Nội đô (01-163)",
+        filterElectric: "Buýt điện (E01-E11)",
+        filterOcp: "OCP / SMC / BRT",
+        filterInter: "Liên tỉnh (202-215)",
+        filterSuspended: "⚠️ Tạm ngưng",
+        favHeader: "Tuyến buýt đã lưu yêu thích",
+        termHeader: "Các bến xe lớn tại Hà Nội",
+        dbStatusTitle: "CƠ SỞ DỮ LIỆU OFFICE-MODE",
+        tapViewCodes: "Nhấn để kiểm tra toàn bộ danh sách mã tuyến",
+        appearanceTitle: "Giao diện & Ngôn ngữ",
+        darkModeLabel: "Chế độ nền tối (Dark Mode)",
+        darkModeSub: "Giảm mỏi mắt khi tra cứu ban đêm",
+        langLabel: "Ngôn ngữ hiển thị",
+        langSub: "Tiếng Việt / English",
+        txtSyncTitle: "Nhập / Xuất dữ liệu tệp TXT",
+        txtSyncDesc: "Hỗ trợ UTF-8 BOM & CRLF. Tự động cập nhật tuyến trùng mã hoặc bổ sung tuyến mới vào bộ nhớ cục bộ.",
+        btnImportTxt: "Chọn tệp .TXT từ máy để nạp",
+        btnPasteTxt: "Dán / Chỉnh sửa nội dung TXT trực tiếp",
+        btnExportFull: "Tải xuống bản sao lưu toàn bộ (.TXT)",
+        btnSampleTxt: "Tải tệp TXT mẫu chuẩn định dạng",
+        storageManageTitle: "Quản lý bộ nhớ cục bộ",
+        storageManageDesc: "Dữ liệu của bạn được bảo lưu tự động trên trình duyệt. Chỉ khôi phục gốc khi bạn muốn đặt lại toàn bộ dữ liệu mặc định.",
+        btnResetDefault: "Khôi phục dữ liệu gốc",
+        navLookup: "Tra cứu",
+        navFav: "Yêu thích",
+        navTerm: "Bến xe",
+        navSettings: "Cài đặt",
+        lblFare: "Giá vé lượt",
+        lblHours: "Giờ hoạt động",
+        lblFreq: "Tần suất chạy",
+        lblUnit: "Đơn vị / Loại hình"
+      },
+      en: {
+        appTitle: "Hanoi Bus Office",
+        offlineReady: "100% Offline · Saved Locally",
+        filterAll: "All Routes",
+        filterInner: "Urban (01-163)",
+        filterElectric: "Electric (E01-E11)",
+        filterOcp: "OCP / SMC / BRT",
+        filterInter: "Inter-provincial",
+        filterSuspended: "⚠️ Suspended",
+        favHeader: "Saved Favorite Bus Routes",
+        termHeader: "Major Hanoi Bus Terminals",
+        dbStatusTitle: "OFFICE-MODE DATABASE",
+        tapViewCodes: "Tap to inspect complete route code index",
+        appearanceTitle: "Appearance & Language",
+        darkModeLabel: "Dark Mode",
+        darkModeSub: "Comfortable viewing in low light",
+        langLabel: "Display Language",
+        langSub: "Tiếng Việt / English",
+        txtSyncTitle: "Native TXT Import / Export",
+        txtSyncDesc: "Supports UTF-8 BOM & CRLF. Updates matching route IDs or appends new routes into localStorage.",
+        btnImportTxt: "Select .TXT file from device",
+        btnPasteTxt: "Paste / Edit TXT directly",
+        btnExportFull: "Download Full Database Backup (.TXT)",
+        btnSampleTxt: "Download Sample TXT Template",
+        storageManageTitle: "Local Storage Management",
+        storageManageDesc: "Your data persists offline automatically. Reset only if you want to restore default factory data.",
+        btnResetDefault: "Restore Factory Default Data",
+        navLookup: "Routes",
+        navFav: "Favorites",
+        navTerm: "Terminals",
+        navSettings: "Settings",
+        lblFare: "Single Fare",
+        lblHours: "Operating Hours",
+        lblFreq: "Frequency",
+        lblUnit: "Operator / Type"
+      }
+    };
+
+    let state = {
+      routes: [],
+      favorites: [],
+      prefs: {
+        darkMode: false,
+        lang: "vi"
+      },
+      activeTab: "lookup",
+      activeFilter: "ALL",
+      searchQuery: "",
+      selectedRouteId: null,
+      selectedDirection: "forward"
+    };
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function normalizeText(str) {
+      return String(str || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d");
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      const el = document.getElementById("toastBox");
+      if (!el) return;
+      el.textContent = message;
+      el.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+    }
+
+    function initStorage() {
+      try {
+        const savedPrefs = localStorage.getItem(STORAGE_KEYS.PREFS);
+        if (savedPrefs) {
+          state.prefs = { ...state.prefs, ...JSON.parse(savedPrefs) };
+        }
+      } catch (e) {}
+
+      try {
+        const savedFavs = localStorage.getItem(STORAGE_KEYS.FAVORITES);
+        if (savedFavs) {
+          const parsed = JSON.parse(savedFavs);
+          if (Array.isArray(parsed)) state.favorites = parsed;
+        }
+      } catch (e) {}
+
+      const defaultRoutes = buildDefaultRoutes();
+      try {
+        const savedRoutesRaw = localStorage.getItem(STORAGE_KEYS.ROUTES);
+        if (savedRoutesRaw) {
+          const savedRoutes = JSON.parse(savedRoutesRaw);
+          if (Array.isArray(savedRoutes) && savedRoutes.length > 0) {
+            const existingMap = new Map(savedRoutes.map((r) => [r.id.toUpperCase(), r]));
+            defaultRoutes.forEach((defRoute) => {
+              if (!existingMap.has(defRoute.id.toUpperCase())) {
+                existingMap.set(defRoute.id.toUpperCase(), defRoute);
+              }
+            });
+            state.routes = Array.from(existingMap.values());
+          } else {
+            state.routes = defaultRoutes;
+          }
+        } else {
+          state.routes = defaultRoutes;
+        }
+      } catch (e) {
+        state.routes = defaultRoutes;
+      }
+
+      persistRoutes();
+    }
+
+    function persistRoutes() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.ROUTES, JSON.stringify(state.routes));
+      } catch (e) {}
+      updateRouteCounters();
+    }
+
+    function persistFavorites() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(state.favorites));
+      } catch (e) {}
+    }
+
+    function persistPrefs() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.PREFS, JSON.stringify(state.prefs));
+      } catch (e) {}
+    }
+
+    function updateRouteCounters() {
+      const count = state.routes.length;
+      const suffix = state.prefs.lang === "en" ? "routes" : "tuyến";
+      const topBadge = document.getElementById("topRouteCountBadge");
+      const settingsCounter = document.getElementById("settingsRouteCounter");
+      if (topBadge) topBadge.textContent = `${count} ${suffix}`;
+      if (settingsCounter) settingsCounter.textContent = `${count} ${suffix}`;
+    }
+
+    function applyThemeAndLanguage() {
+      document.body.classList.toggle("dark-mode", Boolean(state.prefs.darkMode));
+      const darkBtn = document.getElementById("toggleDarkBtn");
+      const langBtn = document.getElementById("toggleLangBtn");
+      if (darkBtn) {
+        darkBtn.textContent = state.prefs.darkMode
+          ? (state.prefs.lang === "en" ? "On" : "Bật")
+          : (state.prefs.lang === "en" ? "Off" : "Tắt");
+        darkBtn.classList.toggle("active", Boolean(state.prefs.darkMode));
+      }
+      if (langBtn) {
+        langBtn.textContent = state.prefs.lang === "en" ? "English" : "Tiếng Việt";
+      }
+
+      const dict = I18N[state.prefs.lang] || I18N.vi;
+      document.querySelectorAll("[data-i18n]").forEach((el) => {
+        const key = el.getAttribute("data-i18n");
+        if (dict[key]) el.textContent = dict[key];
+      });
+
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput) {
+        searchInput.placeholder = state.prefs.lang === "en"
+          ? "Search route ID (01, E01, 202...), street, address..."
+          : "Tìm số tuyến (01, E01, 202...), tên đường, địa chỉ...";
+      }
+
+      updateRouteCounters();
+    }
+
+    function getBadgeTypeClass(route) {
+      if (route.category === "ELECTRIC") return "type-electric";
+      if (route.id === "BRT01") return "type-brt";
+      if (route.category === "OCP") return "type-ocp";
+      if (route.category === "INTER") return "type-inter";
+      return "";
+    }
+
+    function renderRouteCardHTML(route) {
+      const isFav = state.favorites.includes(route.id);
+      const badgeClass = getBadgeTypeClass(route);
+      const stopsSample = (route.forward || [])
+        .map((s) => `${s.name} (${s.address})`)
+        .join(" → ");
+
+      const suspendedBadgeHTML = route.suspended
+        ? `<span class="suspended-badge">⚠️ Tạm ngưng hoạt động</span>`
+        : "";
+
+      return `
+        <article class="route-card" data-route-id="${escapeHtml(route.id)}">
+          <div class="route-card-top">
+            <div class="route-badge ${badgeClass}">${escapeHtml(route.id)}</div>
+            <div class="route-info">
+              <div class="route-name">${escapeHtml(route.name)}</div>
+              <div class="route-streets-preview">${escapeHtml(stopsSample)}</div>
+            </div>
+            <button
+              type="button"
+              class="fav-toggle-btn ${isFav ? "is-fav" : ""}"
+              data-fav-id="${escapeHtml(route.id)}"
+              aria-label="Lưu tuyến ${escapeHtml(route.id)}"
+            >★</button>
+          </div>
+          <div class="route-card-footer">
+            ${suspendedBadgeHTML}
+            <span class="meta-pill">🎫 ${escapeHtml(route.fare)}</span>
+            <span class="meta-pill">🕒 ${escapeHtml(route.hours)}</span>
+            <span class="meta-pill">⏱ ${escapeHtml(route.freq)}</span>
+          </div>
+        </article>
+      `;
+    }
+
+    function filterRoutesList() {
+      const q = normalizeText(state.searchQuery.trim());
+      return state.routes.filter((route) => {
+        if (state.activeFilter === "INNER" && route.category !== "INNER") return false;
+        if (state.activeFilter === "ELECTRIC" && route.category !== "ELECTRIC") return false;
+        if (state.activeFilter === "OCP" && route.category !== "OCP") return false;
+        if (state.activeFilter === "INTER" && route.category !== "INTER") return false;
+        if (state.activeFilter === "SUSPENDED" && !route.suspended) return false;
+
+        if (!q) return true;
+        const haystack = normalizeText(
+          `${route.id} ${route.name} ${route.operator} ` +
+          (route.forward || []).map((s) => `${s.name} ${s.address}`).join(" ")
+        );
+        return haystack.includes(q);
+      });
+    }
+
+    function renderLookupList() {
+      const container = document.getElementById("routeListContainer");
+      const countText = document.getElementById("resultCountText");
+      if (!container) return;
+
+      const filtered = filterRoutesList();
+      if (countText) {
+        countText.textContent = state.prefs.lang === "en"
+          ? `Showing ${filtered.length} bus routes`
+          : `Đang hiển thị ${filtered.length} tuyến buýt`;
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="empty-state">Không tìm thấy tuyến buýt phù hợp với từ khóa của bạn.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(renderRouteCardHTML).join("");
+    }
+
+    function renderFavoritesList() {
+      const container = document.getElementById("favListContainer");
+      const countEl = document.getElementById("favCountText");
+      if (!container) return;
+
+      const favRoutes = state.routes.filter((r) => state.favorites.includes(r.id));
+      if (countEl) {
+        countEl.textContent = `${favRoutes.length} ${state.prefs.lang === "en" ? "routes" : "tuyến"}`;
+      }
+
+      if (favRoutes.length === 0) {
+        container.innerHTML = `<div class="empty-state">Chưa có tuyến yêu thích nào.<br/>Nhấn biểu tượng ★ trên thẻ tuyến để lưu nhanh!</div>`;
+        return;
+      }
+
+      container.innerHTML = favRoutes.map(renderRouteCardHTML).join("");
+    }
+
+    function renderTerminalsList() {
+      const container = document.getElementById("terminalsContainer");
+      if (!container) return;
+
+      container.innerHTML = HANOI_TERMINALS.map((term) => {
+        const pills = term.routes
+          .map((code) => `<button type="button" class="mini-route-pill" data-open-code="${escapeHtml(code)}">${escapeHtml(code)}</button>`)
+          .join("");
+        return `
+          <div class="section-card">
+            <div class="section-card-title">
+              <span>🚏 ${escapeHtml(term.name)}</span>
+              <span class="meta-pill">${term.routes.length} tuyến</span>
+            </div>
+            <div style="font-size: 11.5px; font-weight: 700; color: var(--accent-blue); margin-bottom: 5px;">
+              📍 ${escapeHtml(term.address)}
+            </div>
+            <div class="section-card-desc">${escapeHtml(term.desc)}</div>
+            <div class="terminal-routes-wrap">${pills}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function toggleFavorite(routeId) {
+      const idx = state.favorites.indexOf(routeId);
+      if (idx >= 0) {
+        state.favorites.splice(idx, 1);
+        showToast(`Đã bỏ tuyến ${routeId} khỏi yêu thích`);
+      } else {
+        state.favorites.push(routeId);
+        showToast(`Đã lưu tuyến ${routeId} vào yêu thích`);
+      }
+      persistFavorites();
+      renderLookupList();
+      renderFavoritesList();
+      if (state.selectedRouteId === routeId) {
+        const favBtn = document.getElementById("detailFavBtn");
+        if (favBtn) favBtn.classList.toggle("is-fav", state.favorites.includes(routeId));
+      }
+    }
+
+    function openRouteDetail(routeId) {
+      const route = state.routes.find((r) => r.id === routeId);
+      if (!route) return;
+
+      state.selectedRouteId = route.id;
+      state.selectedDirection = "forward";
+
+      document.getElementById("detailRouteCode").textContent = `TUYẾN BUÝT ${route.id}`;
+      document.getElementById("detailRouteName").textContent = route.name;
+      document.getElementById("detailFare").textContent = route.fare;
+      document.getElementById("detailHours").textContent = route.hours;
+      document.getElementById("detailFreq").textContent = route.freq;
+      document.getElementById("detailOperator").textContent = route.operator;
+
+      const suspBanner = document.getElementById("detailSuspendedBanner");
+      if (suspBanner) suspBanner.style.display = route.suspended ? "block" : "none";
+
+      const favBtn = document.getElementById("detailFavBtn");
+      if (favBtn) favBtn.classList.toggle("is-fav", state.favorites.includes(route.id));
+
+      document.getElementById("dirForwardBtn").classList.add("active");
+      document.getElementById("dirReturnBtn").classList.remove("active");
+
+      renderStopsTimeline(route, "forward");
+
+      const sheet = document.getElementById("detailSheet");
+      sheet.classList.add("open");
+      sheet.setAttribute("aria-hidden", "false");
+      document.getElementById("detailSheetBody").scrollTop = 0;
+    }
+
+    function renderStopsTimeline(route, dir) {
+      const container = document.getElementById("stopsTimelineContainer");
+      if (!container) return;
+      const stops = dir === "return" ? route.return : route.forward;
+
+      if (!stops || stops.length === 0) {
+        container.innerHTML = `<div class="empty-state">Chưa có dữ liệu điểm dừng cho chiều này.</div>`;
+        return;
+      }
+
+      container.innerHTML = stops.map((s, idx) => `
+        <div class="stop-row">
+          <div class="stop-line-col">
+            <div class="stop-dot">${idx + 1}</div>
+            <div class="stop-connector"></div>
+          </div>
+          <div class="stop-content">
+            <div class="stop-title">${escapeHtml(s.name)}</div>
+            <div class="stop-address">📍 ${escapeHtml(s.address)}</div>
+            ${s.tag ? `<span class="stop-tag">${escapeHtml(s.tag)}</span>` : ""}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function closeRouteDetail() {
+      const sheet = document.getElementById("detailSheet");
+      sheet.classList.remove("open");
+      sheet.setAttribute("aria-hidden", "true");
+      state.selectedRouteId = null;
+    }
+
+    function switchTab(tabName) {
+      state.activeTab = tabName;
+      document.querySelectorAll(".nav-item").forEach((btn) => {
+        btn.classList.toggle("active", btn.getAttribute("data-tab") === tabName);
+      });
+      document.querySelectorAll(".tab-pane").forEach((pane) => {
+        pane.classList.toggle("active", pane.id === `tab-${tabName}`);
+      });
+
+      const filterStrip = document.getElementById("filterStrip");
+      if (filterStrip) {
+        filterStrip.style.display = tabName === "lookup" ? "flex" : "none";
+      }
+
+      if (tabName === "favorites") renderFavoritesList();
+      if (tabName === "terminals") renderTerminalsList();
+    }
+
+    function parseTxtContent(rawText) {
+      const cleanText = String(rawText || "").replace(/^\uFEFF/, "").replace(/\r\n/g, "\n");
+      const blocks = cleanText.split(/\[ROUTE\]/i).map((b) => b.trim()).filter(Boolean);
+      let updatedCount = 0;
+      let addedCount = 0;
+
+      blocks.forEach((block) => {
+        const lines = block.split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
+        const record = {};
+        lines.forEach((line) => {
+          const sep = line.indexOf(":");
+          if (sep > 0) {
+            const key = line.slice(0, sep).trim().toUpperCase();
+            const val = line.slice(sep + 1).trim();
+            record[key] = val;
+          }
+        });
+
+        if (!record.ID) return;
+        const id = record.ID.toUpperCase();
+
+        const parseStopsLine = (lineStr) => {
+          if (!lineStr) return [];
+          return lineStr.split("|").map((item, idx, arr) => {
+            const parts = item.split("@");
+            return {
+              order: idx + 1,
+              name: (parts[0] || `Trạm ${idx + 1}`).trim(),
+              address: (parts[1] || "Hà Nội").trim(),
+              tag: idx === 0 ? "Điểm đầu" : idx === arr.length - 1 ? "Điểm cuối" : "Trạm dừng"
+            };
+          });
+        };
+
+        const forward = parseStopsLine(record.FORWARD);
+        const returnStops = record.RETURN
+          ? parseStopsLine(record.RETURN)
+          : [...forward].reverse().map((s, i, a) => ({
+              ...s,
+              order: i + 1,
+              tag: i === 0 ? "Điểm đầu" : i === a.length - 1 ? "Điểm cuối" : "Trạm dừng"
+            }));
+
+        let category = "INNER";
+        if (id.startsWith("E")) category = "ELECTRIC";
+        else if (id === "BRT01" || id.startsWith("OCP") || id.startsWith("SMC")) category = "OCP";
+        else if (/^20\d|^21\d/.test(id)) category = "INTER";
+
+        const existingIndex = state.routes.findIndex((r) => r.id.toUpperCase() === id);
+        const existingObj = existingIndex >= 0 ? state.routes[existingIndex] : null;
+
+        const mergedRoute = {
+          id,
+          name: record.NAME || (existingObj ? existingObj.name : `Tuyến buýt ${id}`),
+          category,
+          fare: record.FARE || (existingObj ? existingObj.fare : "10.000đ"),
+          hours: record.HOURS || (existingObj ? existingObj.hours : "05:00 - 21:00"),
+          freq: record.FREQ || (existingObj ? existingObj.freq : "15 phút"),
+          operator: record.OPERATOR || (existingObj ? existingObj.operator : "Transerco"),
+          suspended: record.STATUS
+            ? record.STATUS.toUpperCase().includes("SUSPEND") || record.STATUS.toUpperCase().includes("NGUNG")
+            : (existingObj ? existingObj.suspended : false),
+          forward: forward.length > 0 ? forward : (existingObj ? existingObj.forward : []),
+          return: returnStops.length > 0 ? returnStops : (existingObj ? existingObj.return : [])
+        };
+
+        if (existingIndex >= 0) {
+          state.routes[existingIndex] = mergedRoute;
+          updatedCount++;
+        } else {
+          state.routes.push(mergedRoute);
+          addedCount++;
+        }
+      });
+
+      if (updatedCount > 0 || addedCount > 0) {
+        persistRoutes();
+        renderLookupList();
+        renderFavoritesList();
+      }
+
+      return { updatedCount, addedCount };
+    }
+
+    function serializeRoutesToTxt(routesArray) {
+      const header = [
+        "# HANOI BUS OFFICE - DU LIEU TUYEN XE BUYT (UTF-8)",
+        "# Dinh dang: [ROUTE] / ID / NAME / FARE / HOURS / FREQ / OPERATOR / STATUS / FORWARD / RETURN",
+        ""
+      ].join("\r\n");
+
+      const body = routesArray.map((r) => {
+        const fwdStr = (r.forward || []).map((s) => `${s.name} @ ${s.address}`).join(" | ");
+        const retStr = (r.return || []).map((s) => `${s.name} @ ${s.address}`).join(" | ");
+        return [
+          "[ROUTE]",
+          `ID: ${r.id}`,
+          `NAME: ${r.name}`,
+          `FARE: ${r.fare}`,
+          `HOURS: ${r.hours}`,
+          `FREQ: ${r.freq}`,
+          `OPERATOR: ${r.operator}`,
+          `STATUS: ${r.suspended ? "SUSPENDED" : "ACTIVE"}`,
+          `FORWARD: ${fwdStr}`,
+          `RETURN: ${retStr}`
+        ].join("\r\n");
+      }).join("\r\n\r\n");
+
+      return "\uFEFF" + header + "\r\n" + body;
+    }
+
+    function triggerDownloadTxt(filename, content) {
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function getSampleTxtTemplate() {
+      return [
+        "\uFEFF# MẪU TỆP CẬP NHẬT TUYẾN XE BUÝT HÀ NỘI (HÀ NỘI BUS OFFICE)",
+        "# Có thể nạp nhiều tuyến cùng lúc bằng cách lặp lại khối [ROUTE]",
+        "",
+        "[ROUTE]",
+        "ID: 01",
+        "NAME: Bến xe Gia Lâm - Bến xe Yên Nghĩa",
+        "FARE: 10.000đ",
+        "HOURS: 05:00 - 21:00",
+        "FREQ: 10 - 15 phút",
+        "OPERATOR: Transerco",
+        "STATUS: ACTIVE",
+        "FORWARD: Bến xe Gia Lâm @ Số 9 Ngô Gia Khảm, Long Biên | Ga Long Biên @ Trần Nhật Duật, Hoàn Kiếm | Bến xe Yên Nghĩa @ Km16 Quốc lộ 6, Hà Đông",
+        "RETURN: Bến xe Yên Nghĩa @ Km16 Quốc lộ 6, Hà Đông | Ga Long Biên @ Trần Nhật Duật, Hoàn Kiếm | Bến xe Gia Lâm @ Số 9 Ngô Gia Khảm, Long Biên"
+      ].join("\r\n");
+    }
+
+    function openModal(title, innerHTML) {
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalBody").innerHTML = innerHTML;
+      document.getElementById("universalModal").classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("universalModal").classList.remove("open");
+    }
+
+    function bindEvents() {
+      const searchInput = document.getElementById("searchInput");
+      const clearBtn = document.getElementById("searchClearBtn");
+
+      searchInput.addEventListener("input", (e) => {
+        state.searchQuery = e.target.value;
+        clearBtn.classList.toggle("visible", state.searchQuery.length > 0);
+        if (state.activeTab !== "lookup") switchTab("lookup");
+        renderLookupList();
+      });
+
+      clearBtn.addEventListener("click", () => {
+        state.searchQuery = "";
+        searchInput.value = "";
+        clearBtn.classList.remove("visible");
+        renderLookupList();
+        searchInput.focus();
+      });
+
+      document.getElementById("filterStrip").addEventListener("click", (e) => {
+        const btn = e.target.closest(".chip-btn");
+        if (!btn) return;
+        state.activeFilter = btn.getAttribute("data-filter");
+        document.querySelectorAll("#filterStrip .chip-btn").forEach((c) => c.classList.remove("active"));
+        btn.classList.add("active");
+        renderLookupList();
+      });
+
+      document.getElementById("mainViewport").addEventListener("click", (e) => {
+        const favBtn = e.target.closest("[data-fav-id]");
+        if (favBtn) {
+          e.stopPropagation();
+          toggleFavorite(favBtn.getAttribute("data-fav-id"));
+          return;
+        }
+
+        const routeCard = e.target.closest("[data-route-id]");
+        if (routeCard) {
+          openRouteDetail(routeCard.getAttribute("data-route-id"));
+          return;
+        }
+
+        const termCodeBtn = e.target.closest("[data-open-code]");
+        if (termCodeBtn) {
+          openRouteDetail(termCodeBtn.getAttribute("data-open-code"));
+        }
+      });
+
+      document.querySelectorAll(".nav-item").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          switchTab(btn.getAttribute("data-tab"));
+        });
+      });
+
+      document.getElementById("closeDetailBtn").addEventListener("click", closeRouteDetail);
+      document.getElementById("detailFavBtn").addEventListener("click", () => {
+        if (state.selectedRouteId) toggleFavorite(state.selectedRouteId);
+      });
+
+      document.getElementById("dirForwardBtn").addEventListener("click", () => {
+        if (!state.selectedRouteId) return;
+        state.selectedDirection = "forward";
+        document.getElementById("dirForwardBtn").classList.add("active");
+        document.getElementById("dirReturnBtn").classList.remove("active");
+        const r = state.routes.find((item) => item.id === state.selectedRouteId);
+        if (r) renderStopsTimeline(r, "forward");
+      });
+
+      document.getElementById("dirReturnBtn").addEventListener("click", () => {
+        if (!state.selectedRouteId) return;
+        state.selectedDirection = "return";
+        document.getElementById("dirReturnBtn").classList.add("active");
+        document.getElementById("dirForwardBtn").classList.remove("active");
+        const r = state.routes.find((item) => item.id === state.selectedRouteId);
+        if (r) renderStopsTimeline(r, "return");
+      });
+
+      document.getElementById("toggleDarkBtn").addEventListener("click", () => {
+        state.prefs.darkMode = !state.prefs.darkMode;
+        persistPrefs();
+        applyThemeAndLanguage();
+      });
+
+      document.getElementById("toggleLangBtn").addEventListener("click", () => {
+        state.prefs.lang = state.prefs.lang === "vi" ? "en" : "vi";
+        persistPrefs();
+        applyThemeAndLanguage();
+        renderLookupList();
+        renderFavoritesList();
+      });
+
+      const txtInput = document.getElementById("txtFileInput");
+      txtInput.addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const result = parseTxtContent(ev.target.result);
+          showToast(`Đã nạp TXT: Cập nhật ${result.updatedCount} tuyến, thêm mới ${result.addedCount} tuyến!`);
+          txtInput.value = "";
+        };
+        reader.onerror = () => {
+          showToast("Lỗi đọc tệp TXT. Vui lòng kiểm tra mã hóa UTF-8.");
+          txtInput.value = "";
+        };
+        reader.readAsText(file, "UTF-8");
+      });
+
+      document.getElementById("openPasteModalBtn").addEventListener("click", () => {
+        openModal(
+          "Dán / Chỉnh sửa dữ liệu TXT trực tiếp",
+          `
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
+              Dán nội dung định dạng <b>[ROUTE]</b> bên dưới. Hệ thống sẽ tự động ghi đè tuyến trùng mã ID hoặc thêm tuyến mới.
+            </p>
+            <textarea id="pasteTxtArea" class="txt-editor-area">${escapeHtml(getSampleTxtTemplate())}</textarea>
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+              <button type="button" class="btn-action primary" id="applyPasteTxtBtn" style="margin:0;">Nạp & Lưu vào bộ nhớ</button>
+            </div>
+          `
+        );
+
+        document.getElementById("applyPasteTxtBtn").addEventListener("click", () => {
+          const textVal = document.getElementById("pasteTxtArea").value;
+          const res = parseTxtContent(textVal);
+          closeModal();
+          showToast(`Đã áp dụng: Cập nhật ${res.updatedCount} tuyến, thêm ${res.addedCount} tuyến.`);
+        });
+      });
+
+      document.getElementById("exportFullTxtBtn").addEventListener("click", () => {
+        const content = serializeRoutesToTxt(state.routes);
+        triggerDownloadTxt("hanoi_bus_office_backup.txt", content);
+        showToast(`Đã xuất ${state.routes.length} tuyến ra tệp TXT!`);
+      });
+
+      document.getElementById("downloadSampleTxtBtn").addEventListener("click", () => {
+        triggerDownloadTxt("hanoi_bus_sample_template.txt", getSampleTxtTemplate());
+        showToast("Đã tải tệp mẫu hanoi_bus_sample_template.txt");
+      });
+
+      const showCatalog = () => {
+        const badges = state.routes
+          .map((r) => `<span class="mini-route-pill" style="${r.suspended ? "border-color:#f59e0b;color:#d97706;" : ""}">${escapeHtml(r.id)}</span>`)
+          .join("");
+        openModal(
+          `Danh mục toàn bộ ${state.routes.length} tuyến đã nạp`,
+          `
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
+              Danh sách mã tuyến hiện đang lưu ngoại tuyến trong Office-Mode:
+            </p>
+            <div class="terminal-routes-wrap">${badges}</div>
+          `
+        );
+      };
+
+      document.getElementById("topRouteCountBadge").addEventListener("click", showCatalog);
+      document.getElementById("openRouteCatalogBtn").addEventListener("click", showCatalog);
+
+      document.getElementById("requestResetBtn").addEventListener("click", () => {
+        document.getElementById("resetConfirmBox").style.display = "block";
+      });
+
+      document.getElementById("confirmResetNoBtn").addEventListener("click", () => {
+        document.getElementById("resetConfirmBox").style.display = "none";
+      });
+
+      document.getElementById("confirmResetYesBtn").addEventListener("click", () => {
+        state.routes = buildDefaultRoutes();
+        persistRoutes();
+        renderLookupList();
+        renderFavoritesList();
+        document.getElementById("resetConfirmBox").style.display = "none";
+        showToast(`Đã khôi phục dữ liệu gốc (${state.routes.length} tuyến chuẩn)!`);
+      });
+
+      document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+      document.getElementById("universalModal").addEventListener("click", (e) => {
+        if (e.target.id === "universalModal") closeModal();
+      });
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      initStorage();
+      applyThemeAndLanguage();
+      renderLookupList();
+      renderTerminalsList();
+      bindEvents();
+    });
+  </script>
+</body>
+</html>
