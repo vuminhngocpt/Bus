@@ -24,5 +24,5 @@ LUU Y
 
 BAN QUYEN
 -Du an ma nguon mo cho phep chinh sua va sap chep ,Nhung hay ghi cong tac gia
--Nha phat hanh : VMN STUDIOS 95
--Nguoi lap trinh : VU MINH NGOC
+-Nha phat hanh VMN STUDIOS 95
+-Nguoi lap trinh VU MINH NGOC
