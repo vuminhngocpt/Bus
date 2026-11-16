@@ -1,4 +1,4 @@
-# VĂN PHÒNG XE BUÝT HÀ NỘI - DỰ ÁN ANDROID
+# BUS - DỰ ÁN ANDROID
 
 Dự án này đóng gói mã nguồn Java/Kotlin gốc vào nền tảng Android WebView:
 - **Hoạt động ngoại tuyến (Offline):** Không cần kết nối Internet đối với giao diện và dữ liệu có sẵn.
