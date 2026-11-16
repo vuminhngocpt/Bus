@@ -1,6 +1,6 @@
 HA NOI BUS OFFICE - DU AN ANDROID
 
-Du an nay dong goi file Java goc vao Android WebView:
+Du an nay dong goi file Java Kotlin goc vao Android WebView:
 - Chay offline, khong can ket noi Internet cho giao dien/du lieu co san.
 - Bat JavaScript va DOM Storage de cac chuc nang va localStorage hoat dong.
 - Ten ung dung: Ha Noi Bus Office
@@ -21,3 +21,8 @@ LUU Y
 - Moi truong tao file hien tai khong co Android SDK/Gradle, nen khong the bien dich APK tai day.
 - File HTML goc duoc giu trong app/src/main/assets/index.html.
 - Du lieu yeu thich/cai dat luu trong WebView localStorage tren thiet bi.
+
+BAN QUYEN
+-Du an ma nguon mo cho phep chinh sua va sap chep ,Nhung hay ghi cong tac gia
+-Nha phat hanh : VMN STUDIOS 95
+-Nguoi lap trinh : VU MINH NGOC
