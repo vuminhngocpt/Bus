@@ -1,6 +1,6 @@
 HA NOI BUS OFFICE - DU AN ANDROID
 
-Du an nay dong goi file HTML goc vao Android WebView:
+Du an nay dong goi file Java goc vao Android WebView:
 - Chay offline, khong can ket noi Internet cho giao dien/du lieu co san.
 - Bat JavaScript va DOM Storage de cac chuc nang va localStorage hoat dong.
 - Ten ung dung: Ha Noi Bus Office
