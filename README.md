@@ -22,7 +22,5 @@ LUU Y
 - File HTML goc duoc giu trong app/src/main/assets/index.html.
 - Du lieu yeu thich/cai dat luu trong WebView localStorage tren thiet bi.
 
-BAN QUYEN
--Du an ma nguon mo cho phep chinh sua va sap chep ,Nhung hay ghi cong tac gia
--Nha phat hanh VMN STUDIOS 95
--Nguoi lap trinh VU MINH NGOC
+BAN QUYEN VA THONG TIN
+- Du an ma nguon mo cho phep chinh sua va sap chep ,Nhung hay ghi cong tac gia
