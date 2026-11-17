@@ -1402,7 +1402,7 @@
           return String(str || '')
             .toLowerCase()
             .normalize('NFD')
-            .replace(/[̀-ͯ]/g, '')
+            .replace(/[\u0300-\u036f]/g, '')
             .replace(/đ/g, 'd');
         }
 
@@ -1727,10 +1727,8 @@
             statusSelect.value = route.status || 'active';
             stationsInput.value = (route.stations || []).join(', ');
 
-            fwdArea.value = (route.forward || []).map(st => `${st.name} - ${st.address}${st.intersecting ? ' - ' + st.intersecting : ''}`).join('
-');
-            retArea.value = (route.return || []).map(st => `${st.name} - ${st.address}${st.intersecting ? ' - ' + st.intersecting : ''}`).join('
-');
+            fwdArea.value = (route.forward || []).map(st => `${st.name} - ${st.address}${st.intersecting ? ' - ' + st.intersecting : ''}`).join('\n');
+            retArea.value = (route.return || []).map(st => `${st.name} - ${st.address}${st.intersecting ? ' - ' + st.intersecting : ''}`).join('\n');
           } else {
             idInput.value = '';
             idInput.disabled = false;
@@ -1767,8 +1765,7 @@
           const stations = stationsStr ? stationsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
 
           const parseStopsText = (text) => {
-            return String(text || '').split('
-').map(line => line.trim()).filter(Boolean).map(line => {
+            return String(text || '').split('\n').map(line => line.trim()).filter(Boolean).map(line => {
               const parts = line.split(' - ').map(p => p.trim());
               return {
                 name: parts[0] || 'Điểm dừng',
@@ -1922,16 +1919,12 @@
 
         function parseTxtRoutes(rawText) {
           if (!rawText || typeof rawText !== 'string') return [];
-          const cleanText = rawText.replace(/^﻿/, '').replace(/
-/g, '
-').replace(//g, '
-');
+          const cleanText = rawText.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
           const blocks = cleanText.split(/\[ROUTE\]/i).map(b => b.trim()).filter(Boolean);
           const parsedRoutes = [];
 
           blocks.forEach(block => {
-            const lines = block.split('
-').map(l => l.trim()).filter(Boolean);
+            const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
             const routeObj = { id: '', name: '', fare: '10.000đ', hours: '05:00 - 21:30', freq: '15 phút', operator: 'Transerco', stations: [], status: 'active', forward: [], return: [] };
             let section = 'META';
 
@@ -2018,10 +2011,8 @@
 
         function serializeRoutesToTxt(routesList) {
           return routesList.map(r => {
-            const fwdLines = (r.forward || []).map((st, idx) => `${idx + 1}. ${st.name} - ${st.address}`).join('
-');
-            const retLines = (r.return || []).map((st, idx) => `${idx + 1}. ${st.name} - ${st.address}`).join('
-');
+            const fwdLines = (r.forward || []).map((st, idx) => `${idx + 1}. ${st.name} - ${st.address}`).join('\n');
+            const retLines = (r.return || []).map((st, idx) => `${idx + 1}. ${st.name} - ${st.address}`).join('\n');
             return [
               '[ROUTE]',
               `ID: ${r.id}`,
@@ -2036,15 +2027,12 @@
               fwdLines,
               '[RETURN]',
               retLines
-            ].join('
-');
-          }).join('
-
-');
+            ].join('\n');
+          }).join('\n\n');
         }
 
         function triggerDownloadTxt(filename, content) {
-          const blob = new Blob(['﻿' + content], { type: 'text/plain;charset=utf-8' });
+          const blob = new Blob(['\uFEFF' + content], { type: 'text/plain;charset=utf-8' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
@@ -2183,8 +2171,7 @@
             '  "forward": [ { "name": "Trạm A", "addr": "Số 20 Phạm Hùng, Mỹ Đình 2, Nam Từ Liêm, Hà Nội", "intersecting": "Tuyến 01, 34" } ],',
             '  "return": [ { "name": "Trạm B", "addr": "Số 1 Trần Phú, Hà Đông, Hà Nội", "intersecting": "Tuyến 02, BRT01" } ]',
             '}'
-          ].join('
-');
+          ].join('\n');
 
           let successCount = 0;
           const successfullyUpdated = [];
@@ -2206,8 +2193,7 @@
               });
 
               const result = await response.json();
-              const rawText = result?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('
-') || '';
+              const rawText = result?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('\n') || '';
               const parsed = extractJsonObjectFromText(rawText);
               if (!parsed || !parsed.name) throw new Error('Invalid JSON structure returned');
 
@@ -2373,20 +2359,26 @@
 
           const timelineContainer = document.getElementById('modal-stops-timeline');
           if (timelineContainer) {
-            timelineContainer.addEventListener('click', (e) => {
+            timelineContainer.addEventListener('click', async (e) => {
               const copyBtn = e.target.closest('button[data-copy-text]');
               if (copyBtn) {
                 e.stopPropagation();
                 const textToCopy = copyBtn.dataset.copyText;
-                const textarea = document.createElement('textarea');
-                textarea.value = textToCopy;
-                textarea.style.position = 'fixed';
-                textarea.style.opacity = '0';
-                document.body.appendChild(textarea);
-                textarea.focus();
-                textarea.select();
                 try {
+                  if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(textToCopy);
+                    showToast(currentLang === 'vi' ? 'Đã sao chép địa chỉ trạm thành công!' : 'Copied station address successfully!');
+                    return;
+                  }
+                  const textarea = document.createElement('textarea');
+                  textarea.value = textToCopy;
+                  textarea.style.position = 'fixed';
+                  textarea.style.opacity = '0';
+                  document.body.appendChild(textarea);
+                  textarea.focus();
+                  textarea.select();
                   const successful = document.execCommand('copy');
+                  document.body.removeChild(textarea);
                   if (successful) {
                     showToast(currentLang === 'vi' ? 'Đã sao chép địa chỉ trạm thành công!' : 'Copied station address successfully!');
                   } else {
@@ -2395,7 +2387,6 @@
                 } catch (err) {
                   showToast('Lỗi sao chép');
                 }
-                document.body.removeChild(textarea);
               }
             });
           }
